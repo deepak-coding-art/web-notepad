@@ -1,0 +1,53 @@
+:root{
+    --white:#ffffff;
+    --black: #000000;
+}
+
+html,body{
+    padding: 0;
+    margin: 0;
+    background-color: var(--white);
+    color: var(--black);
+    font-family: 'Roboto', sans-serif;
+}
+
+.files{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 2rem;
+    text-transform: capitalize;
+}
+
+.select{
+    padding: 10px;
+    margin-right: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+}
+
+.files a {
+    display: none;
+}
+
+.options{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.options-1{
+    margin-right: 20px;
+}
+
+.option{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-left: 10px;
+}
+
+.option-icon{
+    padding: 5px;
+}
