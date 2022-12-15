@@ -1,53 +1,163 @@
-:root{
-    --white:#ffffff;
-    --black: #000000;
+:root {
+  --white: #ffffff;
+  --black: #000000;
+  --gray: #7c7c7c;
+  --blue: #0b0a53;
+  --light-gray: #f0f0f0;
+  --orange: #f79424;
+  --green: #45d141;
 }
 
-html,body{
-    padding: 0;
-    margin: 0;
-    background-color: var(--white);
-    color: var(--black);
-    font-family: 'Roboto', sans-serif;
+html,
+body {
+  padding: 0;
+  margin: 3px;
+  background-color: var(--white);
+  color: var(--black);
+  font-family: "Roboto", sans-serif;
+  width: 100vw;
+  overflow-x: hidden;
 }
 
-.files{
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    font-size: 2rem;
-    text-transform: capitalize;
+/* ------------------------------------------ TOP LINKS ------------------------------------------ */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 2rem;
 }
 
-.select{
-    padding: 10px;
-    margin-right: 10px;
-    font-weight: bold;
-    cursor: pointer;
-    user-select: none;
+.link {
+  border: none;
+  background: none;
+  text-decoration: none;
+  padding: 10px;
+  margin-right: 10px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 2rem;
+  text-transform: capitalize;
+  color: var(--gray);
 }
 
-.files a {
-    display: none;
+.dropdown.active > .link,
+.link:hover {
+  color: var(--black);
 }
 
-.options{
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
+.dropdown {
+  position: relative;
 }
 
-.options-1{
-    margin-right: 20px;
+.dropdown-menu {
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  background-color: var(--white);
+  padding: 0 0.75rem 0.75rem 0.75rem;
+  border: solid 2px var(--blue);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-10px);
+  transition: opacity 150ms ease-in-out, transform 150ms ease-in-out;
 }
 
-.option{
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    margin-left: 10px;
+.drop-view {
+  width: 250px;
 }
 
-.option-icon{
-    padding: 5px;
+.dropdown.active > .link + .dropdown-menu {
+  transform: translateY(0);
+  pointer-events: auto;
+  opacity: 1;
+}
+
+/* .dropdown-menu.active {
+  opacity: 1;
+} */
+
+.dropdown-menu a {
+  text-transform: capitalize;
+  font-size: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+/* -------------------------------------------- OPTIONS ------------------------------------------------ */
+.options {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.options-1 {
+  margin-right: 20px;
+  background-color: var(--light-gray);
+}
+
+.options-2 {
+  background-color: var(--light-gray);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-left: 10px;
+}
+
+.option-icon {
+  padding: 5px;
+}
+
+/* -------------------------------------------- TEXT CONTAINER ----------------------------------------- */
+
+.text-container {
+  width: 99%;
+  min-height: 100vh;
+}
+
+/* --------------------------------------- VERTICAL TOGGLE BUTTON -------------------------------------- */
+.vertical-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: var(--black);
+  border: solid 2px var(--black);
+  border-radius: 25px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 1.5rem;
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+  padding: 1rem;
+}
+
+.vertical-enactive {
+  background-color: var(--orange);
+}
+
+.vertical-active {
+  background-color: var(--green);
+}
+
+.vertical-toggle-status {
+  font-size: 5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+@media only screen and (max-width: 500px) {
+  .vertical-toggle {
+    font-size: 1.5rem;
+    width: 150px;
+  }
+
+  .vertical-toggle-status {
+    font-size: 4rem;
+  }
 }

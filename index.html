@@ -16,10 +16,10 @@
   <body>
     <div class="container">
       <div class="nav">
-        <div class="files">
-          <div class="select file">
-            file
-            <div class="drop drop-file">
+        <div class="top-bar">
+          <div class="dropdown file" data-dropdown>
+            <button class="link" data-dropdown-button>file</button>
+            <div class="dropdown-menu drop-file">
               <a>new</a>
               <a>open</a>
               <a>save</a>
@@ -29,9 +29,9 @@
               <a>share</a>
             </div>
           </div>
-          <div class="select edit">
-            edit
-            <div class="drop drop-edit">
+          <div class="dropdown edit" data-dropdown>
+            <button class="link" data-dropdown-button>edit</button>
+            <div class="dropdown-menu drop-edit">
               <a>cut</a>
               <a>copy</a>
               <a>delete</a>
@@ -41,9 +41,9 @@
               <a>redo</a>
             </div>
           </div>
-          <div class="select view">
-            view
-            <div class="drop drop-view">
+          <div class="dropdown view" data-dropdown>
+            <button class="link" data-dropdown-button>view</button>
+            <div class="dropdown-menu drop-view">
               <a>automatic line-break</a>
             </div>
           </div>
@@ -65,8 +65,21 @@
           </div>
         </div>
       </div>
-      <div class="text-container"></div>
+      <div class="text-container">
+        <textarea name="editor" id="editor"></textarea>
+      </div>
+      <div
+        id="vertical-toggle-button"
+        class="vertical-toggle vertical-enactive"
+      >
+        select text vertically
+        <br />
+        <span class="vertical-toggle-status" id="vertical-toggle-status"
+          >off</span
+        >
+      </div>
     </div>
+    <script src="./js/ui.js"></script>
     <script src="./js/script.js"></script>
   </body>
 </html>
