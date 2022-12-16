@@ -2,7 +2,7 @@
   --white: #ffffff;
   --black: #000000;
   --gray: #7c7c7c;
-  --blue: #0b0a53;
+  --blue: #2e2c8f;
   --light-gray: #f0f0f0;
   --orange: #f79424;
   --green: #45d141;
@@ -17,6 +17,13 @@ body {
   font-family: "Roboto", sans-serif;
   width: 100vw;
   overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  width: 99%;
 }
 
 /* ------------------------------------------ TOP LINKS ------------------------------------------ */
@@ -110,13 +117,27 @@ body {
 
 .option-icon {
   padding: 5px;
+  border: none;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
 }
 
 /* -------------------------------------------- TEXT CONTAINER ----------------------------------------- */
 
 .text-container {
-  width: 99%;
+  margin-top: 1rem;
+  width: 100%;
   min-height: 100vh;
+}
+
+.text-container textarea {
+  width: 99%;
+  height: 800px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: bold;
+  border: solid 1px var(--blue);
 }
 
 /* --------------------------------------- VERTICAL TOGGLE BUTTON -------------------------------------- */
