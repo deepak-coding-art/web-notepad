@@ -1,3 +1,4 @@
+window.jsPDF = window.jspdf.jsPDF;
 // Get editor area
 const textarea = document.getElementById("editor");
 
@@ -13,10 +14,122 @@ const shareBtn = document.getElementById("share-short-btn");
 const undoBtn = document.getElementById("undo-short-btn");
 const redoBtn = document.getElementById("redo-short-btn");
 
+// ---------------------------------------------------------- Get all the file option buttons -------------------------------------------------------
+const newOption = document.getElementById("file-opt-new");
+const openOption = document.getElementById("file-opt-open");
+const saveOption = document.getElementById("file-opt-save");
+const saveAsOption = document.getElementById("file-opt-save-as");
+const saveAsPdfOption = document.getElementById("file-opt-save-as-pdf");
+const printOption = document.getElementById("file-opt-print");
+const shareOption = document.getElementById("file-opt-share");
+
+// ---------------------------------------------------------- Get all the edit option buttons -------------------------------------------------------
+const cutOption = document.getElementById("edit-opt-cut");
+const copyOption = document.getElementById("edit-opt-copy");
+const deleteOption = document.getElementById("edit-opt-delete");
+const selectAllOption = document.getElementById("edit-opt-select-all");
+const pasteOption = document.getElementById("edit-opt-paste");
+const undoOption = document.getElementById("edit-opt-undo");
+const redoOption = document.getElementById("edit-opt-redo");
+
+// ---------------------------------------------------------- Get all the edit option buttons -------------------------------------------------------
+const lineBreak = document.getElementById("dropdown-opt-auto-line-break");
+
+// lineBreak activator
+lineBreak.addEventListener("click", (e) => {
+  e.preventDefault();
+  toggleAutoLineBreak();
+});
+// ---------------------------------------------------------- File Option button event listeners ----------------------------------------------------------
+// save event
+saveAsOption.addEventListener("click", (e) => {
+  e.preventDefault();
+  saveToTextFile();
+});
+
+// save event
+saveOption.addEventListener("click", (e) => {
+  e.preventDefault();
+  saveText();
+});
+
+// load text file event
+openOption.addEventListener("click", (e) => {
+  e.preventDefault();
+  openFile();
+});
+
+// create new document event
+newOption.addEventListener("click", (e) => {
+  e.preventDefault();
+  createNew();
+});
+
+// share event
+shareOption.addEventListener("click", (e) => {
+  e.preventDefault();
+  shareLink();
+});
+
+// print event
+printOption.addEventListener("click", (e) => {
+  e.preventDefault();
+  printText();
+});
+
+// save as PDF event
+saveAsPdfOption.addEventListener("click", (e) => {
+  e.preventDefault();
+  saveAsPDF();
+});
+
+// ---------------------------------------------------------- File Option button event listeners ----------------------------------------------------------
+// copy event
+copyOption.addEventListener("click", (e) => {
+  e.preventDefault();
+  copyText();
+});
+
+// cut event
+cutOption.addEventListener("click", (e) => {
+  e.preventDefault();
+  cutText();
+});
+
+// paste event
+pasteOption.addEventListener("click", (e) => {
+  e.preventDefault();
+  pasteText();
+});
+
+// undo event
+undoOption.addEventListener("click", (e) => {
+  e.preventDefault();
+  undoText();
+});
+
+// redo event
+redoOption.addEventListener("click", (e) => {
+  e.preventDefault();
+  redoText();
+});
+
+// delete event
+deleteOption.addEventListener("click", (e) => {
+  e.preventDefault();
+  deleteText();
+});
+
+// selectAll event
+selectAllOption.addEventListener("click", (e) => {
+  e.preventDefault();
+  selectAllText();
+});
+
 // ---------------------------------------------------------- Config vars ---------------------------------------------------
 const acceptedFileTypes = ["text/html", "text/plain"];
 
-// ---------------------------------------------------------- Button event listeners ----------------------------------------------------------
+// ---------------------------------------------------------- short button event listeners ----------------------------------------------------------
 // copy event
 copyBtn.addEventListener("click", (e) => {
   e.preventDefault();
@@ -56,7 +169,7 @@ redoBtn.addEventListener("click", (e) => {
 // save event
 saveBtn.addEventListener("click", (e) => {
   e.preventDefault();
-  saveToTextFile();
+  saveText();
 });
 
 // load text file event
@@ -78,7 +191,7 @@ shareBtn.addEventListener("click", (e) => {
 });
 
 // ---------------------------------------------------------- Object for storing data ----------------------------------------------------------
-const state = {};
+const state = { lineBreakIsOn: false };
 const maxUndoStack = 50;
 const history = {
   currentIndex: 0,
@@ -147,6 +260,21 @@ function cutText() {
     .catch(function () {
       alert("😞 Sorry something went wrong"); // error
     });
+  textarea.focus();
+}
+
+// delete selected text
+function deleteText() {
+  let cords = getSelectionCords();
+  if (cords.length <= 0) return;
+
+  textarea.setRangeText("", cords[0], cords[1], "start");
+  textarea.focus();
+}
+
+// select all text
+function selectAllText() {
+  textarea.select();
   textarea.focus();
 }
 
@@ -269,6 +397,31 @@ function saveToTextFile() {
   textarea.focus();
 }
 
+// save quickly
+function saveText() {
+  // create a blob from the text
+  const blob = new Blob([textarea.value], { type: "text/plain" });
+
+  // create a URL for the blob
+  const url = URL.createObjectURL(blob);
+
+  // create a link element
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `document-${Math.ceil(Math.random() * 100000)}.txt`;
+
+  // add the link to the DOM
+  document.body.appendChild(link);
+
+  // click the link to trigger the download
+  link.click();
+
+  // remove the link from the DOM
+  document.body.removeChild(link);
+
+  textarea.focus();
+}
+
 // Open a file from users pc
 function openFile() {
   // create string of all accepted file types
@@ -348,6 +501,63 @@ function shareLink() {
     })
     .then(() => {})
     .catch((error) => {});
+}
+
+// Save as pdf
+function saveAsPDF() {
+  const fileName = window.prompt(
+    "Enter a file name:",
+    `document-${Math.ceil(Math.random() * 100000)}.pdf`
+  );
+  if (fileName) {
+    const doc = new jsPDF({ lineHeight: 0.5 });
+
+    // Set the font size and line height
+    doc.setFontSize(12);
+    // Set the maximum width for the text
+    const maxWidth = 180;
+
+    // Set the initial y-position for the text
+    let y = 10;
+
+    // Split the text into an array of substrings that fit within the maximum width
+    const text = textarea.value;
+    const lines = doc.splitTextToSize(text, maxWidth);
+
+    // Add the text to the PDF file, starting a new page if the current page is full
+    lines.forEach((line) => {
+      // Check if the current y-position plus the line height exceeds the page height
+      if (y + doc.getLineHeight() > doc.internal.pageSize.height) {
+        // Add a new page
+        doc.addPage();
+
+        // Reset the y-position to the top of the page
+        y = 10;
+      }
+
+      // Add the line of text to the PDF file
+      doc.text(line, 10, y, { maxWidth });
+
+      // Increment the y-position by the line height
+      y += doc.getLineHeight();
+    });
+
+    doc.save(fileName);
+  }
+  return;
+}
+
+// toggle auto line break
+function toggleAutoLineBreak() {
+  if (state.lineBreakIsOn) {
+    textarea.wrap = "hard";
+    lineBreak.innerHTML = `auto line-break`;
+    state.lineBreakIsOn = false;
+  } else {
+    textarea.wrap = "soft";
+    lineBreak.innerHTML = `<img src="./assets/icons/check.png" alt="check" class="check" /> auto line-break`;
+    state.lineBreakIsOn = true;
+  }
 }
 
 // -------------------------------------------- On Starting (Window event listers) --------------------------------------------

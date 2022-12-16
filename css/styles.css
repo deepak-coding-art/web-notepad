@@ -73,7 +73,7 @@ body {
 }
 
 .drop-view {
-  width: 250px;
+  width: 200px;
 }
 
 .dropdown.active > .link + .dropdown-menu {
@@ -90,6 +90,13 @@ body {
   text-transform: capitalize;
   font-size: 1.5rem;
   margin-top: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.check {
+  max-width: 20px;
+  max-height: 20px;
 }
 
 /* -------------------------------------------- OPTIONS ------------------------------------------------ */
@@ -200,4 +207,9 @@ body {
   .link {
     font-size: 1.4rem;
   }
+}
+
+/* --------------------------------------- Editor -------------------------------------- */
+.editor {
+  white-space: pre-wrap;
 }
