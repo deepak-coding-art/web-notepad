@@ -116,11 +116,20 @@ body {
 }
 
 .option-icon {
-  padding: 5px;
   border: none;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.option img {
+  max-height: 25px;
+  max-width: 25px;
+  padding: 2px;
 }
 
 /* -------------------------------------------- TEXT CONTAINER ----------------------------------------- */
@@ -175,10 +184,20 @@ body {
 @media only screen and (max-width: 500px) {
   .vertical-toggle {
     font-size: 1.5rem;
-    width: 150px;
+    width: 120px;
+    right: 15px;
+    bottom: 20px;
   }
 
   .vertical-toggle-status {
     font-size: 4rem;
+  }
+
+  .top-bar {
+    font-size: 1.7rem;
+  }
+
+  .link {
+    font-size: 1.4rem;
   }
 }

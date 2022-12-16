@@ -13,6 +13,9 @@ const shareBtn = document.getElementById("share-short-btn");
 const undoBtn = document.getElementById("undo-short-btn");
 const redoBtn = document.getElementById("redo-short-btn");
 
+// ---------------------------------------------------------- Config vars ---------------------------------------------------
+const acceptedFileTypes = ["text/html", "text/plain"];
+
 // ---------------------------------------------------------- Button event listeners ----------------------------------------------------------
 // copy event
 copyBtn.addEventListener("click", (e) => {
@@ -48,6 +51,30 @@ undoBtn.addEventListener("click", (e) => {
 redoBtn.addEventListener("click", (e) => {
   e.preventDefault();
   redoText();
+});
+
+// save event
+saveBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  saveToTextFile();
+});
+
+// load text file event
+openBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  openFile();
+});
+
+// create new document event
+newBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  createNew();
+});
+
+// share event
+shareBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  shareLink();
 });
 
 // ---------------------------------------------------------- Object for storing data ----------------------------------------------------------
@@ -207,6 +234,120 @@ function redoText() {
     textarea.setSelectionRange(cords[0], cords[1]);
     textarea.focus();
   }
+}
+
+// Save text from text are in to a text file
+function saveToTextFile() {
+  // ask the user for the desired file name
+  const fileName = window.prompt(
+    "Enter a file name:",
+    `document-${Math.ceil(Math.random() * 100000)}.txt`
+  );
+
+  if (fileName) {
+    // create a blob from the text
+    const blob = new Blob([textarea.value], { type: "text/plain" });
+
+    // create a URL for the blob
+    const url = URL.createObjectURL(blob);
+
+    // create a link element
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+
+    // add the link to the DOM
+    document.body.appendChild(link);
+
+    // click the link to trigger the download
+    link.click();
+
+    // remove the link from the DOM
+    document.body.removeChild(link);
+  }
+
+  textarea.focus();
+}
+
+// Open a file from users pc
+function openFile() {
+  // create string of all accepted file types
+  let fileTypes = "";
+  acceptedFileTypes.forEach((type) => {
+    fileTypes += `${type},`;
+  });
+  // create a file input element
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = fileTypes;
+
+  // add the file input to the DOM
+  document.body.appendChild(fileInput);
+
+  // trigger the file input's click event to open the file picker
+  fileInput.click();
+
+  // remove the file input from the DOM
+  document.body.removeChild(fileInput);
+
+  fileInput.addEventListener("change", () => {
+    // get the selected file
+    const file = fileInput.files[0];
+
+    // Check file type
+    let isAccepted = false;
+    acceptedFileTypes.forEach((type) => {
+      if (file.type === type) {
+        isAccepted = true;
+      }
+    });
+    if (!isAccepted) return;
+    // create a FileReader to read the file
+    const reader = new FileReader();
+    reader.readAsText(file);
+
+    reader.onloadend = function () {
+      // update the editor's content with the file's contents
+      textarea.value = reader.result;
+    };
+  });
+}
+
+// Create new document
+function createNew() {
+  var response = confirm("All old text will be deleted. Are you sure?");
+  if (response == true) {
+    // the user clicked "OK"
+    createNewDocument();
+  } else {
+    // the user clicked "Cancel"
+    return;
+  }
+}
+
+// Clear all data from editor and clear all undo history
+function createNewDocument() {
+  textarea.value = "";
+  history.states = [
+    {
+      value: textarea.value,
+      cords: [textarea.selectionStart, textarea.selectionEnd],
+      commands: {},
+    },
+  ];
+  history.currentIndex = history.states.length;
+}
+
+// Share the page link
+function shareLink() {
+  navigator
+    .share({
+      title: "Web Notepad",
+      text: "Check out this awesome text editor!",
+      url: `${window.location.href}`,
+    })
+    .then(() => {})
+    .catch((error) => {});
 }
 
 // -------------------------------------------- On Starting (Window event listers) --------------------------------------------
