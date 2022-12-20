@@ -1,7 +1,19 @@
+// Load library
 window.jsPDF = window.jspdf.jsPDF;
-// Get editor area
-const textarea = document.getElementById("editor");
+const editor = ace.edit("editor");
 
+// configure text the editor
+editor.setFontSize(18);
+editor.renderer.setShowGutter(false);
+
+// Get vertical select button
+const verticalSelectBtn = document.getElementById("vertical-toggle-button");
+
+// toggle multiple select button
+verticalSelectBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  toggleVerticalSelect();
+});
 // ---------------------------------------------------------- Get all the short buttons ----------------------------------------------------------
 const newBtn = document.getElementById("new-short-btn");
 const openBtn = document.getElementById("open-short-btn");
@@ -191,48 +203,22 @@ shareBtn.addEventListener("click", (e) => {
 });
 
 // ---------------------------------------------------------- Object for storing data ----------------------------------------------------------
-const state = { lineBreakIsOn: false };
-const maxUndoStack = 50;
-const history = {
-  currentIndex: 0,
-  states: [],
-};
+const state = { lineBreakIsOn: false, verticalSelectIsOn: false };
 
 // ---------------------------------------------------------- Event listener on text area ----------------------------------------------------------
 // Text area history events
-textarea.addEventListener("input", (e) => {
-  saveHistory(e.target.value, [textarea.selectionStart, textarea.selectionEnd]);
+editor.on("change", () => {
+  saveHistory();
 });
-// textarea.onselect = selectText;
-
-// // Add selection coordinates to state
-// function selectText(e) {
-//   alert(
-//     e.target.value.substring(e.target.selectionStart, e.target.selectionEnd)
-//   );
-// }
 
 // ---------------------------------------------------------- Functions for performing operations on text --------------------------------------------
 
-// Check for selected text or not
-function getSelectionCords() {
-  if (textarea.selectionStart !== textarea.selectionEnd) {
-    // Text is highlighted
-    return [textarea.selectionStart, textarea.selectionEnd];
-  } else {
-    // Text is not highlighted
-    return [];
-  }
-}
 // copy the selected text
 function copyText() {
-  let cords = getSelectionCords();
-  if (cords.length <= 0) {
-    textarea.select();
-    cords = getSelectionCords();
-  }
+  editor.focus();
+  const text = editor.getSelectedText();
+  if (!text) return;
 
-  const text = textarea.value.substring(cords[0], cords[1]);
   navigator.clipboard
     .writeText(text)
     .then(function () {
@@ -241,17 +227,15 @@ function copyText() {
     .catch(function () {
       alert("😞 Sorry something went wrong"); // error
     });
-  textarea.focus();
-  textarea.setSelectionRange(cords[0], cords[1]);
+  editor.execCommand("copy");
 }
 
-// Cut the selected tex
+// Cut the selected text
 function cutText() {
-  let cords = getSelectionCords();
-  if (cords.length <= 0) return;
+  editor.focus();
+  const text = editor.getSelectedText();
+  if (!text) return;
 
-  const text = textarea.value.substring(cords[0], cords[1]);
-  textarea.setRangeText("", cords[0], cords[1], "start");
   navigator.clipboard
     .writeText(text)
     .then(function () {
@@ -260,49 +244,59 @@ function cutText() {
     .catch(function () {
       alert("😞 Sorry something went wrong"); // error
     });
-  textarea.focus();
+  editor.execCommand("cut");
 }
 
 // delete selected text
 function deleteText() {
-  let cords = getSelectionCords();
-  if (cords.length <= 0) return;
-
-  textarea.setRangeText("", cords[0], cords[1], "start");
-  textarea.focus();
+  editor.focus();
+  editor.execCommand("cut");
 }
 
 // select all text
 function selectAllText() {
-  textarea.select();
-  textarea.focus();
+  editor.focus();
+  editor.selectAll();
+}
+
+// Check if clipboard is allowed
+function isClipboardReadingAllowed() {
+  return new Promise(function (resolve, reject) {
+    try {
+      navigator.permissions
+        .query({ name: "clipboard-read" })
+        .then(function (status) {
+          resolve(status.state == "granted" || status.state == "prompt");
+        });
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
 // Paste text from clipboard
 async function pasteText() {
-  textarea.focus();
-  try {
-    const permission = await navigator.permissions.query({
-      name: "clipboard-read",
+  isClipboardReadingAllowed()
+    .then(function (isAllowed) {
+      if (isAllowed) {
+        navigator.clipboard.read().then((data) => {
+          for (let i = 0; i < data.length; i++) {
+            if (data[i].types.includes("text/plain")) {
+              data[i].getType("text/plain").then(function (blob) {
+                blob.text().then(function (text) {
+                  editor.session.insert(editor.getCursorPosition(), text);
+                });
+              });
+            } else {
+              console.log("Not text/plain to paste into the editor");
+            }
+          }
+        });
+      }
+    })
+    .catch(function (error) {
+      console.log("cannot read clipboard", error);
     });
-    if (permission.state === "denied") {
-      throw new Error("Not allowed to read clipboard.");
-    }
-    const clipboardContents = await navigator.clipboard.readText();
-    textarea.setRangeText(
-      clipboardContents,
-      textarea.selectionStart,
-      textarea.selectionEnd,
-      "start"
-    );
-    textarea.setSelectionRange(
-      textarea.selectionStart,
-      textarea.selectionStart + clipboardContents.length
-    );
-  } catch (error) {
-    alert(error.message);
-    console.error(error.message);
-  }
 }
 
 // Print text from text area
@@ -314,58 +308,44 @@ function printText() {
   );
   childWindow.document.open();
   childWindow.document.write("<html><head></head><body>");
-  childWindow.document.write(
-    document.getElementById("editor").value.replace(/\n/gi, "<br>")
-  );
+  childWindow.document.write(editor.getValue().replace(/\n/gi, "<br>"));
   childWindow.document.write("</body></html>");
   childWindow.print();
   childWindow.document.close();
   childWindow.close();
-  textarea.focus();
+  editor.focus();
 }
 
+// ---------- LocalStorage Cache ------------
+
 // Save history
-function saveHistory(value, cords, commands = {}) {
-  let lastIndexOfStates = history.states.length - 1;
-  if (lastIndexOfStates === -1) lastIndexOfStates = 0;
+function saveHistory() {
+  localStorage.setItem("history", editor.getValue());
+}
 
-  if (history.currentIndex === lastIndexOfStates) {
-    history.states.push({ value, cords, commands });
-  } else {
-    history.states.splice(history.currentIndex);
-    history.states.push({ value, cords, commands });
-  }
-  if (lastIndexOfStates >= maxUndoStack) {
-    history.states.shift();
-  }
-
-  history.currentIndex = history.states.length - 1;
+// Get history
+function getHistory() {
+  return localStorage.getItem("history");
 }
 
 // Undo text from text area
 function undoText() {
-  if (history.currentIndex > 0) {
-    history.currentIndex--;
-    const { value, cords } = history.states[history.currentIndex];
-    textarea.value = value;
-    textarea.setSelectionRange(cords[0], cords[1]);
-    textarea.focus();
-  }
+  editor.execCommand("undo");
+  editor.focus();
 }
 
 // Redo text from text area
 function redoText() {
-  if (history.currentIndex < history.states.length - 1) {
-    history.currentIndex++;
-    const { value, cords } = history.states[history.currentIndex];
-    textarea.value = value;
-    textarea.setSelectionRange(cords[0], cords[1]);
-    textarea.focus();
-  }
+  editor.execCommand("redo");
+  editor.focus();
 }
 
 // Save text from text are in to a text file
 function saveToTextFile() {
+  // check if file is empty
+  if (!editor.getValue())
+    return alert("This file is empty please enter some text first");
+
   // ask the user for the desired file name
   const fileName = window.prompt(
     "Enter a file name:",
@@ -374,7 +354,7 @@ function saveToTextFile() {
 
   if (fileName) {
     // create a blob from the text
-    const blob = new Blob([textarea.value], { type: "text/plain" });
+    const blob = new Blob([editor.getValue()], { type: "text/plain" });
 
     // create a URL for the blob
     const url = URL.createObjectURL(blob);
@@ -394,13 +374,17 @@ function saveToTextFile() {
     document.body.removeChild(link);
   }
 
-  textarea.focus();
+  editor.focus();
 }
 
 // save quickly
 function saveText() {
+  // check if file is empty
+  if (!editor.getValue())
+    return alert("This file is empty please enter some text first");
+
   // create a blob from the text
-  const blob = new Blob([textarea.value], { type: "text/plain" });
+  const blob = new Blob([editor.getValue()], { type: "text/plain" });
 
   // create a URL for the blob
   const url = URL.createObjectURL(blob);
@@ -419,11 +403,12 @@ function saveText() {
   // remove the link from the DOM
   document.body.removeChild(link);
 
-  textarea.focus();
+  editor.focus();
 }
 
 // Open a file from users pc
 function openFile() {
+  editor.focus();
   // create string of all accepted file types
   let fileTypes = "";
   acceptedFileTypes.forEach((type) => {
@@ -461,14 +446,17 @@ function openFile() {
 
     reader.onloadend = function () {
       // update the editor's content with the file's contents
-      textarea.value = reader.result;
+      editor.setValue(reader.result);
+      // remove all undo redo stack
+      editor.getSession().getUndoManager().reset();
     };
   });
 }
 
 // Create new document
 function createNew() {
-  var response = confirm("All old text will be deleted. Are you sure?");
+  editor.focus();
+  let response = confirm("All old text will be deleted. Are you sure?");
   if (response == true) {
     // the user clicked "OK"
     createNewDocument();
@@ -480,15 +468,8 @@ function createNew() {
 
 // Clear all data from editor and clear all undo history
 function createNewDocument() {
-  textarea.value = "";
-  history.states = [
-    {
-      value: textarea.value,
-      cords: [textarea.selectionStart, textarea.selectionEnd],
-      commands: {},
-    },
-  ];
-  history.currentIndex = history.states.length;
+  editor.setValue("");
+  editor.getSession().getUndoManager().reset();
 }
 
 // Share the page link
@@ -521,7 +502,7 @@ function saveAsPDF() {
     let y = 10;
 
     // Split the text into an array of substrings that fit within the maximum width
-    const text = textarea.value;
+    const text = editor.getValue();
     const lines = doc.splitTextToSize(text, maxWidth);
 
     // Add the text to the PDF file, starting a new page if the current page is full
@@ -560,12 +541,46 @@ function toggleAutoLineBreak() {
   }
 }
 
+// Toggle multiline mode
+function toggleVerticalSelect() {
+  const status = document.getElementById("vertical-toggle-status");
+  if (state.verticalSelectIsOn) {
+    status.innerHTML = "OFF";
+    verticalSelectBtn.classList.remove("vertical-active");
+    verticalSelectBtn.classList.add("vertical-enactive");
+    state.verticalSelectIsOn = false;
+  } else {
+    status.innerHTML = "ON";
+    verticalSelectBtn.classList.add("vertical-active");
+    verticalSelectBtn.classList.remove("vertical-enactive");
+    selectMultiLines();
+    state.verticalSelectIsOn = true;
+  }
+  editor.focus();
+}
+
+// Select multiple lines
+function selectMultiLines() {
+  editor._eventRegistry.mousedown[1] = (
+    (func) => (e) =>
+      func({
+        ...e,
+        ...e.__proto__,
+        getButton: () => e.getButton(),
+        domEvent: {
+          ...e.domEvent,
+          altKey: !e.domEvent.altKey,
+          shiftKey: e.domEvent.shiftKey,
+          ctrlKey: e.domEvent.ctrlKey,
+        },
+      })
+  )(editor._eventRegistry.mousedown[1]);
+}
+
 // -------------------------------------------- On Starting (Window event listers) --------------------------------------------
 window.addEventListener("load", (event) => {
-  history.states.push({
-    value: textarea.value,
-    cords: [textarea.selectionStart, textarea.selectionEnd],
-    commands: {},
-  });
-  history.currentIndex = history.states.length;
+  const oldCache = getHistory();
+  editor.setValue(oldCache);
+  editor.clearSelection();
+  editor.focus();
 });
