@@ -648,13 +648,17 @@ function toggleNumberBar() {
 function toggleColorMode() {
   const option1 = document.getElementById("option-1");
   const option2 = document.getElementById("option-2");
-  const dropdown = document.getElementById("dropdown-menu");
+  const dropdownFile = document.getElementById("dropdown-menu-file");
+  const dropdownEdit = document.getElementById("dropdown-menu-edit");
+  const dropdownView = document.getElementById("dropdown-menu-view");
   const editContainer = document.getElementById("editor");
   if (!state.darkMode) {
     document.body.classList.add("page-dark-mode");
     option1.classList.add("options-n-dark-mode");
     option2.classList.add("options-n-dark-mode");
-    dropdown.classList.add("dropdown-menu-dark");
+    dropdownFile.classList.add("dropdown-menu-dark");
+    dropdownEdit.classList.add("dropdown-menu-dark");
+    dropdownView.classList.add("dropdown-menu-dark");
     editContainer.classList.add("editor-dark-mode");
     toggleColorModeBtn.innerHTML = "Light Mode";
     state.darkMode = true;
@@ -662,7 +666,9 @@ function toggleColorMode() {
     document.body.classList.remove("page-dark-mode");
     option1.classList.remove("options-n-dark-mode");
     option2.classList.remove("options-n-dark-mode");
-    dropdown.classList.remove("dropdown-menu-dark");
+    dropdownFile.classList.remove("dropdown-menu-dark");
+    dropdownEdit.classList.remove("dropdown-menu-dark");
+    dropdownView.classList.remove("dropdown-menu-dark");
     editContainer.classList.remove("editor-dark-mode");
     toggleColorModeBtn.innerHTML = "Dark Mode";
     state.darkMode = false;
