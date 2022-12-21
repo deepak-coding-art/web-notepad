@@ -667,6 +667,7 @@ function toggleColorMode() {
     toggleColorModeBtn.innerHTML = "Dark Mode";
     state.darkMode = false;
   }
+  localStorage.setItem("darkMode", state.darkMode ? state.darkMode : "");
 }
 
 // -------------------------------------------- Multi cursor on mobile ------------------------------------------------
@@ -720,6 +721,10 @@ editor.container.addEventListener("touchend", function (event) {
 
 // -------------------------------------------- On Starting (Window event listers) --------------------------------------------
 window.addEventListener("load", (event) => {
+  const colorModeIsDark = !!localStorage.getItem("darkMode");
+  if (colorModeIsDark) {
+    toggleColorMode();
+  }
   const oldCache = getHistory();
   editor.setValue(oldCache);
   editor.clearSelection();
