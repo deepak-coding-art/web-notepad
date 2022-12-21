@@ -48,11 +48,18 @@ const redoOption = document.getElementById("edit-opt-redo");
 
 // ---------------------------------------------------------- Get all the edit option buttons -------------------------------------------------------
 const lineBreak = document.getElementById("dropdown-opt-auto-line-break");
+const numberBar = document.getElementById("toggle-number-bar");
 
 // lineBreak activator
 lineBreak.addEventListener("click", (e) => {
   e.preventDefault();
   toggleAutoLineBreak();
+});
+
+// numberBar
+numberBar.addEventListener("click", (e) => {
+  e.preventDefault();
+  toggleNumberBar();
 });
 // ---------------------------------------------------------- File Option button event listeners ----------------------------------------------------------
 // save event
@@ -205,7 +212,11 @@ shareBtn.addEventListener("click", (e) => {
 });
 
 // ---------------------------------------------------------- Object for storing data ----------------------------------------------------------
-const state = { lineBreakIsOn: false, verticalSelectIsOn: false };
+const state = {
+  lineBreakIsOn: false,
+  verticalSelectIsOn: false,
+  showNumberBar: false,
+};
 
 // ---------------------------------------------------------- Event listener on text area ----------------------------------------------------------
 // Text area history events
@@ -585,6 +596,7 @@ function selectMultiLines() {
   )(editor._eventRegistry.mousedown[1]);
 }
 
+// clipboard check
 function isClipboardWritingAllowed() {
   return new Promise(function (resolve, reject) {
     try {
@@ -606,6 +618,21 @@ function isClipboardWritingAllowed() {
       reject(error);
     }
   });
+}
+
+// toggle number bar
+function toggleNumberBar() {
+  const text = document.getElementById("lineNumberState");
+  if (!state.showNumberBar) {
+    console.log("trigger");
+    editor.renderer.setShowGutter(true);
+    state.showNumberBar = true;
+    text.innerHTML = "Hide";
+  } else {
+    editor.renderer.setShowGutter(false);
+    state.showNumberBar = false;
+    text.innerHTML = "Show";
+  }
 }
 
 // -------------------------------------------- Multi cursor on mobile ------------------------------------------------
