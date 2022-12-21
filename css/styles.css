@@ -6,12 +6,13 @@
   --light-gray: #f0f0f0;
   --orange: #ffc000;
   --green: #92d050;
+  --dark-gray: #313131;
+  --less-dark-gray: #3f3f3f;
 }
 
-html,
 body {
-  padding: 0;
-  margin: 3px;
+  margin: 0;
+  padding: 3px;
   background-color: var(--white);
   color: var(--black);
   font-family: "Roboto", sans-serif;
@@ -19,6 +20,11 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.page-dark-mode {
+  background-color: var(--dark-gray);
+  color: var(--light-gray);
 }
 
 .container {
@@ -70,6 +76,12 @@ body {
   transform: translateY(-10px);
   transition: opacity 150ms ease-in-out, transform 150ms ease-in-out;
   z-index: 100;
+  color: inherit;
+}
+
+.dropdown-menu-dark {
+  background-color: var(--dark-gray);
+  color: var(--black);
 }
 
 .drop-view {
@@ -111,6 +123,10 @@ body {
   background-color: var(--light-gray);
 }
 
+.options-n-dark-mode {
+  background-color: var(--less-dark-gray);
+}
+
 .option {
   display: flex;
   align-items: center;
@@ -127,6 +143,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: transparent;
 }
 
 .option img {
@@ -148,8 +165,24 @@ body {
 }
 
 #editor {
+  position: absolute;
+  top: 100px;
+  right: 0;
+  bottom: 0;
+  left: 0;
   touch-action: auto;
 }
+
+.highLight {
+  background-color: #2e2c8f;
+  font-size: 5rem;
+}
+
+.editor-dark-mode {
+  background-color: var(--dark-gray);
+  color: var(--light-gray);
+}
+
 /* --------------------------------------- VERTICAL TOGGLE BUTTON -------------------------------------- */
 .vertical-toggle {
   display: flex;
@@ -204,18 +237,4 @@ body {
   .link {
     font-size: 1.4rem;
   }
-}
-
-/* --------------------------------------- Editor -------------------------------------- */
-#editor {
-  position: absolute;
-  top: 100px;
-  right: 0;
-  bottom: 0;
-  left: 0;
-}
-
-.highLight {
-  background-color: #2e2c8f;
-  font-size: 5rem;
 }

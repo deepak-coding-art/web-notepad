@@ -6,8 +6,8 @@ const editor = ace.edit("editor");
 editor.setFontSize(18);
 editor.renderer.setShowGutter(false);
 editor.setShowFoldWidgets(false);
-
 editor.setOption("behavioursEnabled", ["cursorBox"]);
+
 // Get vertical select button
 const verticalSelectBtn = document.getElementById("vertical-toggle-button");
 
@@ -49,6 +49,7 @@ const redoOption = document.getElementById("edit-opt-redo");
 // ---------------------------------------------------------- Get all the edit option buttons -------------------------------------------------------
 const lineBreak = document.getElementById("dropdown-opt-auto-line-break");
 const numberBar = document.getElementById("toggle-number-bar");
+const toggleColorModeBtn = document.getElementById("toggleColorMode");
 
 // lineBreak activator
 lineBreak.addEventListener("click", (e) => {
@@ -61,6 +62,13 @@ numberBar.addEventListener("click", (e) => {
   e.preventDefault();
   toggleNumberBar();
 });
+
+// toggle mode
+toggleColorModeBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  toggleColorMode();
+});
+
 // ---------------------------------------------------------- File Option button event listeners ----------------------------------------------------------
 // save event
 saveAsOption.addEventListener("click", (e) => {
@@ -216,6 +224,7 @@ const state = {
   lineBreakIsOn: false,
   verticalSelectIsOn: false,
   showNumberBar: false,
+  darkMode: false,
 };
 
 // ---------------------------------------------------------- Event listener on text area ----------------------------------------------------------
@@ -632,6 +641,31 @@ function toggleNumberBar() {
     editor.renderer.setShowGutter(false);
     state.showNumberBar = false;
     text.innerHTML = "Show";
+  }
+}
+
+// toggle mode
+function toggleColorMode() {
+  const option1 = document.getElementById("option-1");
+  const option2 = document.getElementById("option-2");
+  const dropdown = document.getElementById("dropdown-menu");
+  const editContainer = document.getElementById("editor");
+  if (!state.darkMode) {
+    document.body.classList.add("page-dark-mode");
+    option1.classList.add("options-n-dark-mode");
+    option2.classList.add("options-n-dark-mode");
+    dropdown.classList.add("dropdown-menu-dark");
+    editContainer.classList.add("editor-dark-mode");
+    toggleColorModeBtn.innerHTML = "Light Mode";
+    state.darkMode = true;
+  } else {
+    document.body.classList.remove("page-dark-mode");
+    option1.classList.remove("options-n-dark-mode");
+    option2.classList.remove("options-n-dark-mode");
+    dropdown.classList.remove("dropdown-menu-dark");
+    editContainer.classList.remove("editor-dark-mode");
+    toggleColorModeBtn.innerHTML = "Dark Mode";
+    state.darkMode = false;
   }
 }
 
