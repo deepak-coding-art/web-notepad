@@ -146,6 +146,10 @@ body {
 .ace_mobile-menu {
   display: none !important;
 }
+
+#editor {
+  touch-action: auto;
+}
 /* --------------------------------------- VERTICAL TOGGLE BUTTON -------------------------------------- */
 .vertical-toggle {
   display: flex;

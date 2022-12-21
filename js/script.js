@@ -5,7 +5,9 @@ const editor = ace.edit("editor");
 // configure text the editor
 editor.setFontSize(18);
 editor.renderer.setShowGutter(false);
+editor.setShowFoldWidgets(false);
 
+editor.setOption("behavioursEnabled", ["cursorBox"]);
 // Get vertical select button
 const verticalSelectBtn = document.getElementById("vertical-toggle-button");
 
@@ -531,11 +533,15 @@ function saveAsPDF() {
 // toggle auto line break
 function toggleAutoLineBreak() {
   if (state.lineBreakIsOn) {
-    textarea.wrap = "hard";
+    editor.setOptions({
+      wrap: false,
+    });
     lineBreak.innerHTML = `auto line-break`;
     state.lineBreakIsOn = false;
   } else {
-    textarea.wrap = "soft";
+    editor.setOptions({
+      wrap: true,
+    });
     lineBreak.innerHTML = `<img src="./assets/icons/check.png" alt="check" class="check" /> auto line-break`;
     state.lineBreakIsOn = true;
   }
@@ -549,14 +555,16 @@ function toggleVerticalSelect() {
     verticalSelectBtn.classList.remove("vertical-active");
     verticalSelectBtn.classList.add("vertical-enactive");
     state.verticalSelectIsOn = false;
+    selectMultiLines();
+    editor.focus();
   } else {
     status.innerHTML = "ON";
     verticalSelectBtn.classList.add("vertical-active");
     verticalSelectBtn.classList.remove("vertical-enactive");
-    selectMultiLines();
     state.verticalSelectIsOn = true;
+    selectMultiLines();
+    editor.blur();
   }
-  editor.focus();
 }
 
 // Select multiple lines
@@ -576,6 +584,78 @@ function selectMultiLines() {
       })
   )(editor._eventRegistry.mousedown[1]);
 }
+
+function isClipboardWritingAllowed() {
+  return new Promise(function (resolve, reject) {
+    try {
+      navigator.permissions
+        .query({ name: "clipboard-write" })
+        .then(function (status) {
+          // PermissionStatus object
+          // {
+          //  onchange: null,
+          //  state: "granted" (it could be as well `denied` or `prompt`)
+          // }
+          console.log(status);
+
+          resolve(status.state == "granted");
+        });
+    } catch (error) {
+      // This could be caused because of a Browser incompatibility or security error
+      // Remember that this feature works only through HTTPS
+      reject(error);
+    }
+  });
+}
+
+// -------------------------------------------- Multi cursor on mobile ------------------------------------------------
+let selections = [];
+
+editor.container.addEventListener("touchstart", function (e) {
+  if (!state.verticalSelectIsOn) return;
+  // Check for the presence of two touch points
+  if (e.touches.length == 1) {
+    // Get the touch position
+    var touchX = e.touches[0].clientX;
+    var touchY = e.touches[0].clientY;
+    // Convert the touch position to a cursor position
+    var cursorPos = editor.renderer.screenToTextCoordinates(touchX, touchY);
+    // Set the selection ranges
+    let selectionStart = { row: cursorPos.row, column: cursorPos.column };
+    selections.push({ start: selectionStart, end: selectionStart });
+  }
+});
+
+// Add an event listener for the "touchmove" event
+editor.container.addEventListener("touchmove", function (e) {
+  if (!state.verticalSelectIsOn) return;
+  // Get the touch position
+  var touchX = e.touches[0].clientX;
+  var touchY = e.touches[0].clientY;
+  // Convert the touch position to a cursor position
+  var cursorPos = editor.renderer.screenToTextCoordinates(touchX, touchY);
+  // Set the selection ranges
+  selections.forEach((selection, index) => {
+    selections[index].end = {
+      row: selection.start.row,
+      column: cursorPos.column,
+    };
+    if (cursorPos.row !== selection.start.row) {
+      selections.push({
+        start: { row: cursorPos.row, column: selection.start.column },
+        end: { row: cursorPos.row, column: cursorPos.column },
+      });
+    }
+  });
+  editor.selection.fromJSON(selections);
+});
+
+// Add an event listener for the "touchend" event
+editor.container.addEventListener("touchend", function (event) {
+  if (!state.verticalSelectIsOn) return;
+  // Reset the flag indicating that the selection is in progress
+  selections = [];
+});
 
 // -------------------------------------------- On Starting (Window event listers) --------------------------------------------
 window.addEventListener("load", (event) => {
