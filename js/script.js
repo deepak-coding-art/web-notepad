@@ -7,6 +7,7 @@ editor.setFontSize(18);
 editor.renderer.setShowGutter(false);
 editor.setShowFoldWidgets(false);
 editor.setOption("behavioursEnabled", ["cursorBox"]);
+editor.setShowPrintMargin(false);
 
 // Get vertical select button
 const verticalSelectBtn = document.getElementById("vertical-toggle-button");
@@ -633,7 +634,6 @@ function isClipboardWritingAllowed() {
 function toggleNumberBar() {
   const text = document.getElementById("lineNumberState");
   if (!state.showNumberBar) {
-    console.log("trigger");
     editor.renderer.setShowGutter(true);
     state.showNumberBar = true;
     text.innerHTML = "Hide";

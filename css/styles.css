@@ -8,6 +8,8 @@
   --green: #92d050;
   --dark-gray: #313131;
   --less-dark-gray: #3f3f3f;
+  --text-gray: #ececec;
+  --text-dark-gray: #aaaaaa;
 }
 
 body {
@@ -181,7 +183,15 @@ body {
 
 .editor-dark-mode {
   background-color: var(--dark-gray);
-  color: var(--light-gray);
+  color: var(--text-gray);
+}
+
+/* .ace_gutter-cell-dark {
+  background-color: var(--less-dark-gray);
+  color: var(--text-dark-gray);
+} */
+.ace_split-view-container .ace_splitter {
+  display: none;
 }
 
 /* --------------------------------------- VERTICAL TOGGLE BUTTON -------------------------------------- */
