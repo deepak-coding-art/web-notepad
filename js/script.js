@@ -234,6 +234,23 @@ editor.on("change", () => {
   saveHistory();
 });
 
+var observer = new MutationObserver(function (mutations) {
+  mutations.forEach(function (mutation) {
+    if (mutation.attributeName === "style") {
+      if (state.lineBreakIsOn) {
+        editor.setOptions({
+          wrap: false,
+        });
+        editor.setOptions({
+          wrap: true,
+        });
+      }
+    }
+  });
+});
+
+observer.observe(editor.container, { attributes: true });
+
 // ---------------------------------------------------------- Functions for performing operations on text --------------------------------------------
 
 // copy the selected text
